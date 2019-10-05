@@ -90,17 +90,75 @@ class AlgoStrategy(gamelib.AlgoCore):
                 - Check which of these attack points causes damage to encryptors
         2) Send attack for best line
         '''
-        pre_wall_release_locations = [[13, 0], [14, 0]] # these locations are for before the wall
-        after_wall_release_locations = [[1, 12], [26, 12]] # hard coded for now, but are the left and right corners
-
-        if (game_state.turn_number > 3 and game_state.turn_number % 2 == 0):
+        release_locations = [[15, 1], [12, 1]] # these locations are for before corners are blocked
+        blocked_release_locations = [[2, 11], [25, 11]] # these locations are for after corners are blocked
+        
+        if (game_state.turn_number > 3 and game_state.turn_number % 2 == 0): # might want to switch this up
             self.build_left_wall(game_state)
-            game_state.attempt_spawn(PING, [14, 0], 10000)
+            self.build_right_wall(game_state)
+
+
+            # We can tell that corners are blocked when the second step in the path has a lower y
+            for location in blocked_release_locations:
+                path = game_state.find_path_to_edge(location)
+                if (path is not None and len(path) > 2):
+                    if (path[0][1] > path[1][1]): # TODO: Chck this does not throw error
+                        release_locations.insert(0, location) # these locations should have priority
+
+            game_state.attempt_spawn(PING, self.best_spawn_calculation(game_state, release_locations), 10000)
 
     def build_left_wall(self, game_state):
-        left_wall_locations = [[13, 2],[14, 2], [12, 3], [11, 4], [10, 5], [9, 6], [8, 7], [7, 8], [6, 9], [5, 10]]
+        left_wall_locations = [[12, 3], [11, 4], [10, 5], [9, 6], [8, 7], [7, 8], [6, 9], [5, 10], [4, 11]]
         game_state.attempt_spawn(ENCRYPTOR, left_wall_locations)
 
+    def build_right_wall(self, game_state):
+        right_wall_locations = [[15, 3], [16, 4], [17, 5], [18, 6], [19, 7], [20, 8], [21, 9], [22, 10], [23, 11]]
+        game_state.attempt_spawn(ENCRYPTOR, right_wall_locations)
+
+    def best_spawn_calculation(self, game_state, location_options):
+        """
+        This function will help us guess which location is the safest to spawn moving units from.
+        It gets the path the unit will take then checks locations on that path to 
+        estimate the path's damage risk.
+
+        It will also search for what defenses are on the path that it can add (NOT YET ADDED)
+        """
+        damages = []
+        # Get the damage estimate each path will take
+        for location in location_options:
+            path = game_state.find_path_to_edge(location)
+            damage = 0
+            for path_location in path:
+                # Get number of enemy destructors that can attack the final location and multiply by destructor damage
+                damage += len(game_state.get_attackers(path_location, 0)) * gamelib.GameUnit(DESTRUCTOR, game_state.config).damage
+                # TODO: Get number of shields to subtract!!!!
+            damages.append(damage)
+        
+        # Now just return the location that takes the least damage
+        return location_options[damages.index(min(damages))]
+
+    # def get_buffers(self, game_map, location, player_index):
+    #     """Gets the encryptors threatening a given location
+
+    #     Args:
+    #         * location: The location of a hypothetical defender
+    #         * player_index: The index corresponding to the defending player, 0 for you 1 for the enemy
+
+    #     Returns:
+    #         A list of encryptors that would attack a unit controlled by the given player at the given location
+
+    #     """
+
+    #     encryptors = []
+    #     """
+    #     Get locations in the range of DESTRUCTOR units
+    #     """
+    #     possible_locations= game_map.get_locations_in_range(location, self.config["unitInformation"][UNIT_TYPE_TO_INDEX[ENCRYPTOR]]["range"])
+    #     for location in possible_locations:
+    #         for unit in self.game_map[location]:
+    #             if unit.unit_type == ENCRYPTOR and unit.player_index != player_index:
+    #                 attackers.append(unit)
+    #     return attackers
 
     ''' DANIEL '''
     def static_defense(self, game_state):
@@ -131,6 +189,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         gamelib.debug_write(mid_destructor_points)
         game_state.attempt_spawn(DESTRUCTOR, mid_destructor_points)
 
+    ''' RYAN '''
     def build_defences(self, game_state):
         """
         Build basic defenses using hardcoded locations.
@@ -142,9 +201,18 @@ class AlgoStrategy(gamelib.AlgoCore):
         # Place destructors that attack enemy units
         destructor_locations = [[0, 13], [27, 13], [8, 11], [19, 11], [13, 11], [14, 11]]
         # attempt_spawn will try to spawn units if we have resources, and will check if a blocking unit is already there
-        game_state.attempt_spawn(DESTRUCTOR, destructor_locations)
-        
+        for destructor_location in destructor_locations:
+            success = game_state.attempt_spawn(DESTRUCTOR, destructor_location)
+            if success == 1:
+                new_filter_location = [destructor_location[0] + 1, destructor_location[1]]
+                game_state.attempt_spawn(FILTER, new_filter_location)
+       # for destructor_death in self.destructor_deaths:
+        #    game_state.attempt_spawn(destructor_death)
+         #   new_filter_location = [destructor_death[0] + 1, destructor_death[1] - 1]
+          #  game_state.attempt_spawn(FILTER, new_filter_location)
+           # self.destructor_deaths.clear()
         # Place filters in front of destructors to soak up damage for them
+        game_state.attempt_spawn(DESTRUCTOR, destructor_locations)
         filter_locations = [[8, 12], [19, 12]]
         game_state.attempt_spawn(FILTER, filter_locations)
 
