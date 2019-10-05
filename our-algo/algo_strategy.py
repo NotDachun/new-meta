@@ -79,6 +79,40 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.static_defense(game_state)
         self.general_attack_strategy(game_state)
         
+    def first_strike(self, game_state):
+        # Get the damage estimate each path will take
+        damages = []
+        for location in game_state.game_map.get_edge_locations(game_state.game_map.BOTTOM_LEFT):
+            path = game_state.find_path_to_edge(location)
+            damage = 0
+            if path is None:
+                return
+            for path_location in path:
+                # Get number of enemy destructors that can attack the final location and multiply by destructor damage
+                damage += len(game_state.get_attackers(path_location, 0)) * gamelib.GameUnit(DESTRUCTOR, game_state.config).damage
+                # TODO: Get number of shields to subtract!!!!
+            damages.append(damage)
+        
+        if (min(damages) == 0):
+            game_state.attempt_spawn(PING, game_state.game_map.BOTTOM_LEFT(damages.index(min(damages))), 10000)
+            return
+        
+        damages = []
+        for location in game_state.game_map.get_edge_locations(game_state.game_map.BOTTOM_RIGHT):
+            path = game_state.find_path_to_edge(location)
+            damage = 0
+            if path is None:
+                return
+            for path_location in path:
+                # Get number of enemy destructors that can attack the final location and multiply by destructor damage
+                damage += len(game_state.get_attackers(path_location, 0)) * gamelib.GameUnit(DESTRUCTOR, game_state.config).damage
+                # TODO: Get number of shields to subtract!!!!
+            damages.append(damage)
+
+        if (min(damages) == 0):
+            game_state.attempt_spawn(PING, game_state.game_map.BOTTOM_RIGHT(damages.index(min(damages))), 10000)
+            return
+
 
     def general_attack_strategy(self, game_state):
         '''
@@ -93,16 +127,17 @@ class AlgoStrategy(gamelib.AlgoCore):
         release_locations = [[15, 1], [12, 1]] # these locations are for before corners are blocked
         blocked_release_locations = [[2, 11], [25, 11]] # these locations are for after corners are blocked
         
-        # if (1 <= game_state.turn_number <= 2):
+        if (1 <= game_state.turn_number <= 2):
             # do an analysis and attack
-
+            self.first_strike(game_state)
 
         min_size_of_attack = 10 # the number of minimum pings we want to send
+        next_turn_to_increment = 20
+        if (game_state.turn_number % next_turn_to_increment == 0 and game_state.turn_number != 0):
+            min_size_of_attack += 3
+            next_turn_to_increment += 10
 
-        if (game_state.turn_number % 15 == 0 and game_state.turn_number != 0):
-            min_size_of_attack += 5
-
-        if (game_state.turn_number > 2 and game_state.BITS >= min_size_of_attack): # might want to switch this up
+        if (game_state.turn_number > 2 and game_state.get_resource(game_state.BITS) >= min_size_of_attack): # might want to switch this up
             self.build_left_wall(game_state)
             self.build_right_wall(game_state)
 
