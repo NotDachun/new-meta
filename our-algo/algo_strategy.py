@@ -276,19 +276,23 @@ class AlgoStrategy(gamelib.AlgoCore):
 
             full13 = game_state.attempt_spawn(FILTER, row13_priority)
             full12 = game_state.attempt_spawn(DESTRUCTOR, row12_priority)
+            full14 = 1
+            full15 = 1
 
             if not full13 and not full12:
                 mid_filter_points = [[12, 12], [15, 12], [12, 11], [15, 11], [12, 10], [15, 10], [12, 9], [15, 9], [12, 8], [15, 8], [12, 7], [15, 7], [12, 6], [15, 6], [12, 5], [15, 5]]
                 gamelib.debug_write(mid_filter_points)
-                game_state.attempt_spawn(FILTER, mid_filter_points)
+                full14 = game_state.attempt_spawn(FILTER, mid_filter_points)
 
                 # # y - 11 to 16 x 11
                 mid_destructor_points = [[11, 11], [16, 11], [11, 10], [16, 10], [11, 9], [16, 9], [11, 8], [16, 8], [11, 7], [16, 7], [11, 6], [16, 6], [11, 5], [16, 5], [12, 4], [15, 4], [12, 3], [15, 3]]
                 gamelib.debug_write(mid_destructor_points)
-                game_state.attempt_spawn(DESTRUCTOR, mid_destructor_points)
+                full15 = game_state.attempt_spawn(DESTRUCTOR, mid_destructor_points)
 
-            extra_destructors = [[6, 11], [7, 11], [8, 11], [9, 11], [10, 11], [17, 11], [18, 11], [19, 11], [20, 11], [21, 11], [10, 10], [17, 10], [10, 9], [17, 9], [10, 8], [17, 8], [10, 7], [17, 7], [10, 6], [17, 6]]
-
+            extra_destructors = [[6, 11], [7, 11], [8, 11], [9, 11], [10, 11], [17, 11], [18, 11], [19, 11], [20, 11], [21, 11], [9, 10], [10, 10], [17, 10], [18, 10], [9, 9], [10, 9], [17, 9], [18, 9], [9, 8], [10, 8], [17, 8], [18, 8], [9, 7], [10, 7], [17, 7], [18, 7], [10, 6], [17, 6]]
+            if not full12 and not full13 and not full14 and not full15:
+                game_state.attempt_spawn(DESTRUCTOR, extra_destructors)
+            
     def least_damage_spawn_location(self, game_state, location_options):
         """
         This function will help us guess which location is the safest to spawn moving units from.
