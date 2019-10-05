@@ -76,7 +76,11 @@ class AlgoStrategy(gamelib.AlgoCore):
         For offense we will use long range EMPs if they place stationary units near the enemy's front.
         If there are no stationary units to attack in the front, we will send Pings to try and score quickly.
         """
+        ratio = self.get_ratio_for_defense(game_state)
+
+        attack = game_state._player_resources[0]['cores'] - game_state._player_resources[0]['cores'] * ratio
         self.static_defense(game_state)
+        game_state._player_resources[0]['cores'] = attack
         self.general_attack_strategy(game_state)
         
     def first_strike(self, game_state):
