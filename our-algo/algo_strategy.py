@@ -277,8 +277,6 @@ class AlgoStrategy(gamelib.AlgoCore):
             full13 = game_state.attempt_spawn(FILTER, row13_priority)
             full12 = game_state.attempt_spawn(DESTRUCTOR, row12_priority)
 
-            full13 = 1
-            full12 = 1
             if not full13 and not full12:
                 mid_filter_points = [[12, 12], [15, 12], [12, 11], [15, 11], [12, 10], [15, 10], [12, 9], [15, 9], [12, 8], [15, 8], [12, 7], [15, 7], [12, 6], [15, 6], [12, 5], [15, 5]]
                 gamelib.debug_write(mid_filter_points)
