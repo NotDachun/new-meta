@@ -1,0 +1,23 @@
+Random seed: 2979995489240182302
+---------------- Starting Your Algo --------------------
+Configuring your custom algo strategy...
+Performing turn 0 of your custom algo strategy
+Performing turn 1 of your custom algo strategy
+Performing turn 2 of your custom algo strategy
+Performing turn 3 of your custom algo strategy
+Performing turn 4 of your custom algo strategy
+Performing turn 5 of your custom algo strategy
+Traceback (most recent call last):
+  File "C:\Users\asus\OneDrive - UW\new-meta\python-algo\algo_strategy.py", line 238, in <module>
+    algo.start()
+  File "C:\Users\asus\OneDrive - UW\new-meta\python-algo\gamelib\algocore.py", line 69, in start
+    self.on_turn(game_state_string)
+  File "C:\Users\asus\OneDrive - UW\new-meta\python-algo\algo_strategy.py", line 62, in on_turn
+    game_state.submit_turn()
+  File "C:\Users\asus\OneDrive - UW\new-meta\python-algo\gamelib\game_state.py", line 162, in submit_turn
+    send_command(build_string)
+  File "C:\Users\asus\OneDrive - UW\new-meta\python-algo\gamelib\util.py", line 30, in send_command
+    sys.stdout.flush()
+OSError: [Errno 22] Invalid argument
+Exception ignored in: <_io.TextIOWrapper name='<stdout>' mode='w' encoding='cp1252'>
+OSError: [Errno 22] Invalid argument
