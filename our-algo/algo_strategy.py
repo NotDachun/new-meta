@@ -75,42 +75,41 @@ class AlgoStrategy(gamelib.AlgoCore):
         For offense we will use long range EMPs if they place stationary units near the enemy's front.
         If there are no stationary units to attack in the front, we will send Pings to try and score quickly.
         """
-        # First, place basic defenses
-        self.build_defences(game_state)
-        # Now build reactive defenses based on where the enemy scored
-        self.build_reactive_defense(game_state)
-
-        # If the turn is less than 5, stall with Scramblers and wait to see enemy's base
-        if game_state.turn_number < 5:
-            self.stall_with_scramblers(game_state)
-        else:
-            # Now let's analyze the enemy base to see where their defenses are concentrated.
-            # If they have many units in the front we can build a line for our EMPs to attack them at long range.
-            if self.detect_enemy_unit(game_state, unit_type=None, valid_x=None, valid_y=[14, 15]) > 10:
-                self.emp_line_strategy(game_state)
-            else:
-                # They don't have many units in the front so lets figure out their least defended area and send Pings there.
-
-                # Only spawn Ping's every other turn
-                # Sending more at once is better since attacks can only hit a single ping at a time
-                if game_state.turn_number % 2 == 1:
-                    # To simplify we will just check sending them from back left and right
-                    ping_spawn_location_options = [[13, 0], [14, 0]]
-                    best_location = self.least_damage_spawn_location(game_state, ping_spawn_location_options)
-                    game_state.attempt_spawn(PING, best_location, 1000)
-
-                # Lastly, if we have spare cores, let's build some Encryptors to boost our Pings' health.
-                encryptor_locations = [[13, 2], [14, 2], [13, 3], [14, 3]]
-                game_state.attempt_spawn(ENCRYPTOR, encryptor_locations)
+        self.static_defense(game_state)
+        self.general_attack_strategy(game_state)
+        
 
 
+    def general_attack_strategy(self, game_state):
+        '''
+        Ultimately, we are trying an attack down the middle.
+        1) Build lines on both sides
+          - This enables us 4 attack points (2 release and 2 gates)
+                - We should check which of these 4 attack points is blocked
+                    - Check to see if it the blocker is strong (like a filter) or weak
+                - Check which of these attack points causes damage to encryptors
+        2) Send attack for best line
+        '''
+        pre_wall_release_locations = [[13, 0], [14, 0]] # these locations are for before the wall
+        after_wall_release_locations = [[1, 12], [26, 12]] # hard coded for now, but are the left and right corners
+
+        if (game_state.turn_number > 3 and game_state.turn_number % 2 == 0):
+            self.build_left_wall(game_state)
+            game_state.attempt_spawn(PING, [14, 0], 10000)
+
+    def build_left_wall(self, game_state):
+        left_wall_locations = [[13, 2],[14, 2], [12, 3], [11, 4], [10, 5], [9, 6], [8, 7], [7, 8], [6, 9], [5, 10]]
+        game_state.attempt_spawn(ENCRYPTOR, left_wall_locations)
+
+
+    ''' DANIEL '''
     def static_defense(self, game_state):
         filter_points = [[1, 13], [26, 13], [6, 13], [21, 13], [11, 13], [16, 13]]
 
         destructor_points = [[1, 12], [26, 12], [6, 12], [21, 12], [11, 12], [16, 12]]
 
         if game_state.turn_number > 1:
-            filter_points.extend([[0, 13], [27, 13], [2, 13], [25, 13], [8, 13], [19, 13], [17, 13], [10, 13]])
+            filter_points.extend([[0, 13], [27, 13], [2, 13], [25, 13], [8, 13], [19, 13], [17, 13], [10, 13], [23, 13]])
             destructor_points.extend([[3, 13], [24, 13], [3, 12], [24, 12], [7, 12], [20, 12], [22, 12], [10, 12], [5, 12], [17, 1]])
 
         
