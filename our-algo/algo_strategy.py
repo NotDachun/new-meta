@@ -80,7 +80,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.general_attack_strategy(game_state)
         
 
-
     def general_attack_strategy(self, game_state):
         '''
         Ultimately, we are trying an attack down the middle.
@@ -94,7 +93,16 @@ class AlgoStrategy(gamelib.AlgoCore):
         release_locations = [[15, 1], [12, 1]] # these locations are for before corners are blocked
         blocked_release_locations = [[2, 11], [25, 11]] # these locations are for after corners are blocked
         
-        if (game_state.turn_number > 3 and game_state.turn_number % 2 == 0): # might want to switch this up
+        # if (1 <= game_state.turn_number <= 2):
+            # do an analysis and attack
+
+
+        min_size_of_attack = 10 # the number of minimum pings we want to send
+
+        if (game_state.turn_number % 15 == 0 and game_state.turn_number != 0):
+            min_size_of_attack += 5
+
+        if (game_state.turn_number > 2 and game_state.BITS >= min_size_of_attack): # might want to switch this up
             self.build_left_wall(game_state)
             self.build_right_wall(game_state)
 
@@ -160,6 +168,26 @@ class AlgoStrategy(gamelib.AlgoCore):
     #             if unit.unit_type == ENCRYPTOR and unit.player_index != player_index:
     #                 attackers.append(unit)
     #     return attackers
+
+    def get_ratio_for_defense(self, game_state):
+        scale_defense = 1
+        if (game_state.enemy_health < 20):
+            scale_defense = 0.8
+        elif (game_state.enemy_health < 10):
+            scale_defense = 0.5
+        elif (game_state.enemy_health < 5):
+            scale_defense = 0.3
+
+        if (game_state.turn_number > 15): # only during a high turn
+            if (game_state.my_health > 35):
+                return 0.5 * scale_defense
+            elif (game_state.my_health > 30):
+                return 0.75 * scale_defense
+            elif (game_state.my_health > 25):
+                return 0.8 * scale_defense
+                
+        return 1
+        
 
     ''' DANIEL '''
     def static_defense(self, game_state):
