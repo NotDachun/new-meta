@@ -108,6 +108,29 @@ class AlgoStrategy(gamelib.AlgoCore):
 
             game_state.attempt_spawn(PING, self.best_spawn_calculation(game_state, release_locations), 10000)
 
+
+    def build_reactive_defense(self, game_state, destructor_locations):
+        """
+        This function builds reactive defenses based on where the enemy scored on us from.
+        We can track where the opponent scored by looking at events in action frames 
+        as shown in the on_action_frame function
+        """
+        priority_list = {}
+        
+        new_list = []
+        for location in self.scored_on_locations:
+            for destructor_location in destructor_locations:
+                distance = game_state.game_map.distance_between_locations(destructor_location, location)
+                priority_list[distance] = destructor_location
+        for element in sorted(priority_list.keys()):
+            new_list.append(priority_list[element])
+        
+        if new_list:
+            gamelib.debug_write(new_list)
+            return new_list
+        else:
+            return destructor_locations
+
     def build_left_wall(self, game_state):
         left_wall_locations = [[12, 3], [11, 4], [10, 5], [9, 6], [8, 7], [7, 8], [6, 9], [5, 10], [4, 11]]
         game_state.attempt_spawn(ENCRYPTOR, left_wall_locations)
@@ -175,13 +198,20 @@ class AlgoStrategy(gamelib.AlgoCore):
             filter_points.extend([[0, 13], [27, 13], [2, 13], [25, 13], [8, 13], [19, 13], [17, 13], [10, 13], [23, 13]])
             destructor_points.extend([[3, 13], [24, 13], [3, 12], [24, 12], [7, 12], [20, 12], [22, 12], [10, 12], [5, 12], [17, 1]])
 
+            filter_points = self.build_reactive_defense(game_state, filter_points)
+            destructor_points = self.build_reactive_defense(game_state, destructor_points)
         
             game_state.attempt_spawn(FILTER, filter_points)
             game_state.attempt_spawn(DESTRUCTOR, destructor_points)
+            
+            row13_priority = self.build_reactive_defense(game_state, row13)
+            row12_priority = self.build_reactive_defense(game_state, row12)
 
-            full13 = game_state.attempt_spawn(FILTER, row13)
-            full12 = game_state.attempt_spawn(DESTRUCTOR, row12)
+            full13 = game_state.attempt_spawn(FILTER, row13_priority)
+            full12 = game_state.attempt_spawn(DESTRUCTOR, row12_priority)
 
+            full13 = 1
+            full12 = 1
             if not full13 and not full12:
                 mid_filter_points = [[12, 12], [15, 12], [12, 11], [15, 11], [12, 10], [15, 10], [12, 9], [15, 9], [12, 8], [15, 8], [12, 7], [15, 7], [12, 6], [15, 6], [12, 5], [15, 5]]
                 gamelib.debug_write(mid_filter_points)
@@ -193,89 +223,6 @@ class AlgoStrategy(gamelib.AlgoCore):
                 game_state.attempt_spawn(DESTRUCTOR, mid_destructor_points)
 
             extra_destructors = [[6, 11], [7, 11], [8, 11], [9, 11], [10, 11], [17, 11], [18, 11], [19, 11], [20, 11], [21, 11], [10, 10], [17, 10], [10, 9], [17, 9], [10, 8], [17, 8], [10, 7], [17, 7], [10, 6], [17, 6]]
-
-    ''' RYAN '''
-    def build_defences(self, game_state):
-        """
-        Build basic defenses using hardcoded locations.
-        Remember to defend corners and avoid placing units in the front where enemy EMPs can attack them.
-        """
-        # Useful tool for setting up your base locations: https://www.kevinbai.design/terminal-map-maker
-        # More community tools available at: https://terminal.c1games.com/rules#Download
-
-        # Place destructors that attack enemy units
-        destructor_locations = [[0, 13], [27, 13], [8, 11], [19, 11], [13, 11], [14, 11]]
-        # attempt_spawn will try to spawn units if we have resources, and will check if a blocking unit is already there
-        for destructor_location in destructor_locations:
-            success = game_state.attempt_spawn(DESTRUCTOR, destructor_location)
-            if success == 1:
-                new_filter_location = [destructor_location[0] + 1, destructor_location[1]]
-                game_state.attempt_spawn(FILTER, new_filter_location)
-       # for destructor_death in self.destructor_deaths:
-        #    game_state.attempt_spawn(destructor_death)
-         #   new_filter_location = [destructor_death[0] + 1, destructor_death[1] - 1]
-          #  game_state.attempt_spawn(FILTER, new_filter_location)
-           # self.destructor_deaths.clear()
-        # Place filters in front of destructors to soak up damage for them
-        game_state.attempt_spawn(DESTRUCTOR, destructor_locations)
-        filter_locations = [[8, 12], [19, 12]]
-        game_state.attempt_spawn(FILTER, filter_locations)
-
-    def build_reactive_defense(self, game_state):
-        """
-        This function builds reactive defenses based on where the enemy scored on us from.
-        We can track where the opponent scored by looking at events in action frames 
-        as shown in the on_action_frame function
-        """
-        for location in self.scored_on_locations:
-            # Build destructor one space above so that it doesn't block our own edge spawn locations
-            build_location = [location[0], location[1]+1]
-            game_state.attempt_spawn(DESTRUCTOR, build_location)
-
-    def stall_with_scramblers(self, game_state):
-        """
-        Send out Scramblers at random locations to defend our base from enemy moving units.
-        """
-        # We can spawn moving units on our edges so a list of all our edge locations
-        friendly_edges = game_state.game_map.get_edge_locations(game_state.game_map.BOTTOM_LEFT) + game_state.game_map.get_edge_locations(game_state.game_map.BOTTOM_RIGHT)
-        
-        # Remove locations that are blocked by our own firewalls 
-        # since we can't deploy units there.
-        deploy_locations = self.filter_blocked_locations(friendly_edges, game_state)
-        
-        # While we have remaining bits to spend lets send out scramblers randomly.
-        while game_state.get_resource(game_state.BITS) >= game_state.type_cost(SCRAMBLER) and len(deploy_locations) > 0:
-            # Choose a random deploy location.
-            deploy_index = random.randint(0, len(deploy_locations) - 1)
-            deploy_location = deploy_locations[deploy_index]
-            
-            game_state.attempt_spawn(SCRAMBLER, deploy_location)
-            """
-            We don't have to remove the location since multiple information 
-            units can occupy the same space.
-            """
-
-    def emp_line_strategy(self, game_state):
-        """
-        Build a line of the cheapest stationary unit so our EMP's can attack from long range.
-        """
-        # First let's figure out the cheapest unit
-        # We could just check the game rules, but this demonstrates how to use the GameUnit class
-        stationary_units = [FILTER, DESTRUCTOR, ENCRYPTOR]
-        cheapest_unit = FILTER
-        for unit in stationary_units:
-            unit_class = gamelib.GameUnit(unit, game_state.config)
-            if unit_class.cost < gamelib.GameUnit(cheapest_unit, game_state.config).cost:
-                cheapest_unit = unit
-
-        # Now let's build out a line of stationary units. This will prevent our EMPs from running into the enemy base.
-        # Instead they will stay at the perfect distance to attack the front two rows of the enemy base.
-        for x in range(27, 5, -1):
-            game_state.attempt_spawn(cheapest_unit, [x, 11])
-
-        # Now spawn EMPs next to the line
-        # By asking attempt_spawn to spawn 1000 units, it will essentially spawn as many as we have resources for
-        game_state.attempt_spawn(EMP, [24, 10], 1000)
 
     def least_damage_spawn_location(self, game_state, location_options):
         """
