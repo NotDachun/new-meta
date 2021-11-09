@@ -1,8 +1,6 @@
 package com.c1games.terminal.algo;
 
 import com.c1games.terminal.algo.serialization.*;
-import com.c1games.terminal.algo.units.FirewallUnitType;
-import com.c1games.terminal.algo.units.InfoUnitType;
 import com.c1games.terminal.algo.units.UnitType;
 import com.c1games.terminal.algo.units.UnitTypeAtlas;
 import com.google.gson.*;
@@ -74,24 +72,26 @@ public class FrameData {
         }
     }
     public static final class PlayerUnits {
-        public PlayerUnitList filter;
-        public PlayerUnitList encryptor;
-        public PlayerUnitList destructor;
-        public PlayerUnitList ping;
-        public PlayerUnitList emp;
-        public PlayerUnitList scrambler;
+        public PlayerUnitList wall;
+        public PlayerUnitList support;
+        public PlayerUnitList turret;
+        public PlayerUnitList scout;
+        public PlayerUnitList demolisher;
+        public PlayerUnitList interceptor;
         public PlayerUnitList remove;
+        public PlayerUnitList upgrade;
 
         @Override
         public String toString() {
             return "PlayerUnits{" +
-                    "filter=" + filter +
-                    ", encryptor=" + encryptor +
-                    ", destructor=" + destructor +
-                    ", ping=" + ping +
-                    ", emp=" + emp +
-                    ", scrambler=" + scrambler +
+                    "wall=" + wall +
+                    ", support=" + support +
+                    ", turret=" + turret +
+                    ", scout=" + scout +
+                    ", demolisher=" + demolisher +
+                    ", interceptor=" + interceptor +
                     ", remove=" + remove +
+                    ", upgrade=" + upgrade +
                     '}';
         }
     }
@@ -290,24 +290,24 @@ public class FrameData {
         }
         public List<SelfDestructEvent> selfDestruct;
         public static final class ShieldEvent {
-            public Coords encryptorCoords;
-            public Coords infoCoords;
+            public Coords supportCoords;
+            public Coords mobileUnitCoords;
             public float shieldAmount;
-            public UnitType encryptorType;
-            public String encryptorUnitId;
-            public String infoUnitId;
-            public PlayerId encryptorOwner;
+            public UnitType supportType;
+            public String supportUnitId;
+            public String mobileUnitId;
+            public PlayerId supportOwner;
 
             @Override
             public String toString() {
                 return "ShieldEvent{" +
-                        "encryptorCoords=" + encryptorCoords +
-                        ", infoCoords=" + infoCoords +
+                        "supportCoords=" + supportCoords +
+                        ", mobileUnitCoords=" + mobileUnitCoords +
                         ", shieldAmount=" + shieldAmount +
-                        ", encryptorType=" + encryptorType +
-                        ", encryptorUnitId='" + encryptorUnitId + '\'' +
-                        ", infoUnitId='" + infoUnitId + '\'' +
-                        ", encryptorOwner=" + encryptorOwner +
+                        ", supportType=" + supportType +
+                        ", supportUnitId='" + supportUnitId + '\'' +
+                        ", mobileUnitId='" + mobileUnitId + '\'' +
+                        ", supportOwner=" + supportOwner +
                         '}';
             }
         }
@@ -362,8 +362,6 @@ public class FrameData {
         return new GsonBuilder()
                 .registerTypeAdapter(Coords.class, new JsonDeserializeClassFromTuple<>(Coords.class, () -> new Coords(-1, -1)))
                 .registerTypeAdapter(UnitType.class, new UnitTypeDeserializer(atlas))
-                .registerTypeAdapter(InfoUnitType.class, new InfoUnitTypeDeserializer(atlas))
-                .registerTypeAdapter(FirewallUnitType.class, new FirewallUnitTypeDeserializer(atlas))
                 .registerTypeAdapter(TurnInfo.Phase.class, new JsonDeserializeEnumFromInt<>(TurnInfo.Phase.class))
                 .registerTypeAdapter(TurnInfo.class, new JsonDeserializeClassFromTuple<>(TurnInfo.class, TurnInfo::new))
                 .registerTypeAdapter(PlayerStats.class, new JsonDeserializeClassFromTuple<>(PlayerStats.class, PlayerStats::new))

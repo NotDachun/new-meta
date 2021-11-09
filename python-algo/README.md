@@ -7,7 +7,6 @@ starter-algo
  │
  ├──gamelib
  │   ├──__init__.py
- │   ├──advanced_game_state.py
  │   ├──algocore.py
  │   ├──game_map.py
  │   ├──game_state.py
@@ -15,8 +14,9 @@ starter-algo
  │   ├──tests.py
  │   ├──unit.py
  │   └──util.py
- │ 
+ │
  ├──algo_strategy.py
+ ├──documentation
  ├──README.md
  ├──run.ps1
  └──run.sh
@@ -24,7 +24,8 @@ starter-algo
 
 ### Creating an Algo
 
-To create an algo, simply modify the `algo_strategy.py` file.
+To create an algo, simply modify the `algo_strategy.py` file. 
+To upload to terminal, upload the entire python-algo folder.
 
 ### `algo_strategy.py`
 
@@ -37,11 +38,17 @@ the game state for each turn. Refer to the `starter_strategy` method for inspira
 If your algo requires initialization then you should also implement the
 `on_game_start` method and do any inital setup there.
 
+### `documentation`
+
+A directory containing the sphinx generated programming documentation, as well as the files required
+to build it. You can view the docs by opening index.html in documents/_build.
+You can remake the documentation by running 'make html' in the documentation folder.
+You will need to install sphinx for this command to work.
+
 ### `run.sh`
 
-A script that contains logic to invoke your code. You shouldn't need to change
-this unless you change file structure or require a more customized process
-startup.
+A script that contains logic to invoke your code. You do not need to run this directly.
+See the 'scripts' folder in the Starterkit for information about testing locally.
 
 ### `run.ps1`
 
@@ -55,10 +62,6 @@ This file tells python to treat `gamelib` as a bundled python module. This
 library of functions and classes is intended to simplify development by
 handling tedious tasks such as communication with the game engine, summarizing
 the latest turn, and estimating paths based on the latest board state.
-
-### `gamelib/advanced_game_state.py`
-
-This module contains the `AdvancedGameState` class. This file is a version of gamestate with access to a few more advanced functions.
 
 ### `gamelib/algocore.py`
 
@@ -94,5 +97,4 @@ Helper functions and values that do not yet have a better place to live.
 
 The starter strategy is designed to highlight a few common `GameMap` functions
 and give the user a functioning example to work with. It's gameplan is to 
-draw the C1 logo, place destructors in its corners, and randomly spawn encryptors
-and units.
+draw the C1 logo, place turrets in its corners, and randomly spawn units.

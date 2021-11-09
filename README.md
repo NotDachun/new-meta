@@ -13,12 +13,16 @@ before you start your algo. Check out [the playground](https://terminal.c1games.
 
 ## Algo Development
 
-To test your algo locally, you should use the new test_algo_[OS] scripts in the scripts folder. Details on its use is documented in the README.md file in the scripts folder. Using this script and the website features are enough for most users to play the game.
+To test your algo locally, you should use the test_algo_[OS] scripts in the scripts folder. Details on its use is documented in the README.md file in the scripts folder.
 
-For documentation on the all official algos check out [the doc server](https://docs.c1games.com). This site also details useful configuration settings, and advanced details on the input formatting under "Json Format".
+For programming documentation of language specific algos, see each language specific README.
+For documentation of the game-config or the json format the engine uses to communicate the current game state, see json-docs.html
 
-For advanced users you can install java and run the game engine locally, however its recommended to use the website for proper analysis as it has visualization features to help you understand.
-Java 10 or above is required: [Java Development Kit 10 or above](http://www.oracle.com/technetwork/java/javase/downloads/jdk10-downloads-4416644.html), if you cannot download java 10 just download the most recent java version.
+For advanced users you can install java and run the game engine locally. Java 10 or above is required: [Java Development Kit 10 or above](http://www.oracle.com/technetwork/java/javase/downloads/jdk10-downloads-4416644.html).
+
+All code provided in the starterkit is meant to be used as a starting point, and can be overwritten completely by more advanced players to improve performance or provide additional utility.
+
+## Windows Setup
 
 If you are running Windows, you will need Windows PowerShell installed. This comes pre-installed on Windows 10.
 Some windows users might need to run the following PowerShell commands in adminstrator mode (right-click the 
@@ -39,12 +43,7 @@ And don't forget to run the PowerShell as admin.
 
 ## Uploading Algos
 
-Zip your algo with the platform-appropriate `zipalgo` binary, found in the `scripts` directory. This
-will generate a deflated zip archive, details are provided in the [documentation in the scripts directory](https://github.com/correlation-one/AIGamesStarterKit/tree/master/scripts). 
-
-For example, you can run:
-
-./scripts/zipalgo_mac python-algo my-python-algo.zip
+Simply select the folder of your algo when prompted on the [Terminal](https://terminal.c1games.com) website. Make sure to select the specific language folder such as "python-algo" do not select the entire starterkit itself.
 
 ## Troubleshooting
 

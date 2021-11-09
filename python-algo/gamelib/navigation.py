@@ -7,10 +7,10 @@ from .util import debug_write
 class Node:
     """A pathfinding node
 
-    Attributes:
+    Attributes :
         * visited_idealness (bool): Have we visited this node during the idealness search step?
         * visited_validate (bool): Have we visited this node during the validation step?
-        * blocked (bool): Is there a firewall at this node's location
+        * blocked (bool): Is there a structures at this node's location
         * pathlength: The distance between this node and the target location
 
     """
@@ -28,7 +28,7 @@ code to maximise time efficiency
 class ShortestPathFinder:
     """Handles pathfinding
 
-    Attributes:
+    Attributes :
         * HORIZONTAL (int): A constant representing a horizontal movement
         * VERTICAL (int): A constant representing a vertical movement
 
@@ -45,7 +45,7 @@ class ShortestPathFinder:
         """Initializes the map
 
         Args:
-            * game_state: A GameState object representing the gamestate we want to 
+            game_state: A GameState object representing the gamestate we want to traverse
         """
         #Initialize map 
         self.initialized = True
@@ -62,7 +62,7 @@ class ShortestPathFinder:
 
         Returns:
             The path a unit at start_point would take when trying to reach end_points given the current game state.
-            Note that this path can change if a tower is destroyed during pathing, or if you or your enemy places firewalls.
+            Note that this path can change if a tower is destroyed during pathing, or if you or your enemy places structures.
 
         """
         if game_state.contains_stationary_unit(start_point):
